@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: macos-15 # Uses the latest macOS runner available in 2026
+    runs-on: macos-15 # Latest macOS runner for 2026
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -17,15 +17,19 @@ jobs:
         run: npm install
 
       - name: Fix Permissions
-        # This gives the 'cap' command permission to run on the Mac server
         run: chmod +x node_modules/.bin/cap
 
-      - name: Sync iOS Platform
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      - name: Install Pods
+        # Navigates to the iOS folder to install native dependencies
         run: |
-          # We don't use 'add' here because the folder is already in the repo
-          npx cap sync ios
+          cd ios/App
+          pod install
 
       - name: Build iOS App (Unsigned)
+        # Navigates to the correct folder where App.xcworkspace actually exists
         run: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace \
@@ -39,6 +43,7 @@ jobs:
                      build
 
       - name: Create IPA Structure
+        # This packages the built .app into a .ipa file for AltStore
         run: |
           mkdir -p build/Payload
           cp -r ios/App/build/Build/Products/Debug-iphoneos/App.app build/Payload
