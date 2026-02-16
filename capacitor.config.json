@@ -1,0 +1,13 @@
+
+{
+  "appId": "com.AyushEHR.app",
+  "appName": "AyushEHR",
+  "webDir": "www",
+  "server": {
+    "url": "https://appdev.ayushehr.com/",
+    "allowNavigation": [
+      "appdev.ayushehr.com",
+      "*.appdev.ayushehr.com"
+    ]
+  }
+}
