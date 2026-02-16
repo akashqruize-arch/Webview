@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: macos-15 # Optimized for the latest 2026 runners
+    runs-on: macos-15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -17,22 +17,19 @@ jobs:
         run: npm install
 
       - name: Fix Permissions
-        # Ensures Capacitor has permission to execute on the Mac runner
         run: chmod +x node_modules/.bin/cap
 
-      - name: Sync Capacitor
+      - name: Fresh iOS Setup
+        # CRITICAL FIX: Removes the broken/incomplete ios folder 
+        # and regenerates it from scratch to ensure Podfile exists.
         run: |
+          rm -rf ios
+          npx cap add ios
           npx cap sync ios
-          # Safety check: If the Podfile is missing, force-generate it
-          if [ ! -f "ios/App/Podfile" ]; then
-            echo "Podfile missing, force adding ios platform..."
-            npx cap add ios
-          fi
 
       - name: Install Pods
         run: |
           cd ios/App
-          # Update CocoaPods repo and install dependencies
           pod install
 
       - name: Build iOS App (Unsigned)
@@ -51,7 +48,6 @@ jobs:
       - name: Create IPA Structure
         run: |
           mkdir -p build/Payload
-          # Copy the built app into the Payload folder for packaging
           cp -r ios/App/build/Build/Products/Debug-iphoneos/App.app build/Payload
           cd build && zip -r ../WebViewApp.ipa Payload
 
