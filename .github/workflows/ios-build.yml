@@ -3,7 +3,8 @@ on: [push]
 
 jobs:
   build:
-    runs-on: macos-15 # Uses the latest macOS runner
+    runs-on: macos-15
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -20,11 +21,13 @@ jobs:
         run: chmod +x node_modules/.bin/cap
 
       - name: Clean & Fresh Setup
-        # CRITICAL FIX: Delete the broken ios folder and create it fresh
         run: |
           rm -rf ios
           npx cap add ios
           npx cap sync ios
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
 
       - name: Install Pods
         run: |
