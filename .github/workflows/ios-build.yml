@@ -16,9 +16,13 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Add iOS Platform
+      - name: Fix Permissions
+        # This gives the 'cap' command permission to run on the Mac server
+        run: chmod +x node_modules/.bin/cap
+
+      - name: Sync iOS Platform
         run: |
-          npx cap add ios
+          # We don't use 'add' here because the folder is already in the repo
           npx cap sync ios
 
       - name: Build iOS App (Unsigned)

@@ -4,7 +4,7 @@
   "appName": "AyushEHR",
   "webDir": "www",
   "server": {
-    "url": "https://appdev.ayushehr.com/",
+    "url": "https://appdev.ayushehr.com",
     "allowNavigation": [
       "appdev.ayushehr.com",
       "*.appdev.ayushehr.com"
