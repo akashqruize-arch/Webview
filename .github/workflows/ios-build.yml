@@ -4,7 +4,6 @@ on: [push]
 jobs:
   build:
     runs-on: macos-15
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -20,28 +19,33 @@ jobs:
       - name: Fix Permissions
         run: chmod +x node_modules/.bin/cap
 
-      - name: Clean & Fresh Setup
+      - name: Clean & Fresh iOS Platform
         run: |
+          # 1. Force remove any existing ios folder to avoid "already exists" errors
           rm -rf ios
+          
+          # 2. Add and sync platform fresh on the Mac runner
           npx cap add ios
-      - name: Debug iOS folder
-        run: |
-          echo "===== ROOT ====="
-          ls
-          echo "===== IOS ====="
-          ls ios || echo "ios folder not created"
-          echo "===== IOS/APP ====="
-          ls ios/App || echo "ios/App not created"
-
           npx cap sync ios
-
-      - name: Install CocoaPods
-        run: sudo gem install cocoapods
+          
+          # 3. EMERGENCY FIX: If the Podfile is still missing, we write it manually
+          if [ ! -f "ios/App/Podfile" ]; then
+            echo "Podfile missing! Creating manual fallback..."
+            cat <<EOF > ios/App/Podfile
+            platform :ios, '13.0'
+            use_frameworks!
+            target 'App' do
+              pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
+              pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+            end
+          EOF
+          fi
 
       - name: Install Pods
         run: |
           cd ios/App
-          pod install
+          # Update the repo to ensure we see the latest 2026 pods
+          pod install --repo-update
 
       - name: Build iOS App (Unsigned)
         run: |
@@ -56,13 +60,13 @@ jobs:
                      CODE_SIGN_IDENTITY="" \
                      build
 
-      - name: Create IPA
+      - name: Create IPA Structure
         run: |
           mkdir -p build/Payload
           cp -r ios/App/build/Build/Products/Debug-iphoneos/App.app build/Payload
           cd build && zip -r ../WebViewApp.ipa Payload
 
-      - name: Upload Artifact
+      - name: Upload Finished App
         uses: actions/upload-artifact@v4
         with:
           name: ios-webview-app
