@@ -21,25 +21,21 @@ jobs:
 
       - name: Clean & Fresh iOS Platform
         run: |
-          # 1. Force remove any existing ios folder to avoid "already exists" errors
           rm -rf ios
-          
-          # 2. Add and sync platform fresh on the Mac runner
           npx cap add ios
           npx cap sync ios
           
-          # 3. EMERGENCY FIX: If the Podfile is still missing, we write it manually
-          if [ ! -f "ios/App/Podfile" ]; then
-            echo "Podfile missing! Creating manual fallback..."
-            cat <<EOF > ios/App/Podfile
-            platform :ios, '13.0'
-            use_frameworks!
-            target 'App' do
-              pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
-              pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
-            end
+          # Force the Podfile to use iOS 14.0 (Minimum for Capacitor 7/8)
+          echo "Bumping iOS deployment target in Podfile..."
+          cat <<EOF > ios/App/Podfile
+          platform :ios, '14.0'
+          use_frameworks!
+          target 'App' do
+            # Standard Capacitor Pods
+            pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
+            pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+          end
           EOF
-          fi
 
       - name: Install Pods
         run: |
