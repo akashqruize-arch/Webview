@@ -21,29 +21,27 @@ jobs:
 
       - name: Clean & Fresh iOS Platform
         run: |
-          # 1. Clear the old folder
           rm -rf ios
-          
-          # 2. Add the platform fresh
           npx cap add ios
           npx cap sync ios
           
-          # 3. FORCE the Podfile to use iOS 15.0 (The 2026 Standard)
-          echo "Bumping iOS deployment target to 15.0 for Capacitor 8 compatibility..."
+          # 1. Force Podfile to 15.0
           cat <<EOF > ios/App/Podfile
           platform :ios, '15.0'
           use_frameworks!
           target 'App' do
-            # Standard Capacitor Pods
             pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
             pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
           end
           EOF
 
+          # 2. FORCE Xcode Project settings to 15.0
+          # This fixes Error 65 by aligning the project with the Podfile
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' ios/App/App.xcodeproj/project.pbxproj
+
       - name: Install Pods
         run: |
           cd ios/App
-          # Update the repo to ensure we see the latest 2026 pods
           pod install --repo-update
 
       - name: Build iOS App (Unsigned)
@@ -57,6 +55,7 @@ jobs:
                      CODE_SIGNING_ALLOWED=NO \
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGN_IDENTITY="" \
+                     COMPILER_INDEX_STORE_ENABLE=NO \
                      build
 
       - name: Create IPA Structure
