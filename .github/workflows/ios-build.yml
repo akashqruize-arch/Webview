@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-15 # Uses the latest macOS runner
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -19,9 +19,8 @@ jobs:
       - name: Fix Permissions
         run: chmod +x node_modules/.bin/cap
 
-      - name: Fresh iOS Setup
-        # CRITICAL FIX: Removes the broken/incomplete ios folder 
-        # and regenerates it from scratch to ensure Podfile exists.
+      - name: Clean & Fresh Setup
+        # CRITICAL FIX: Delete the broken ios folder and create it fresh
         run: |
           rm -rf ios
           npx cap add ios
@@ -45,13 +44,13 @@ jobs:
                      CODE_SIGN_IDENTITY="" \
                      build
 
-      - name: Create IPA Structure
+      - name: Create IPA
         run: |
           mkdir -p build/Payload
           cp -r ios/App/build/Build/Products/Debug-iphoneos/App.app build/Payload
           cd build && zip -r ../WebViewApp.ipa Payload
 
-      - name: Upload Finished App
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-webview-app
