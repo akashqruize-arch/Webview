@@ -22,10 +22,11 @@ jobs:
       - name: Clean & Fresh iOS Platform
         run: |
           rm -rf ios
-          npx cap add ios
+          # FORCE Capacitor to use CocoaPods instead of the new SPM default
+          npx cap add ios --packagemanager cocoapods
           npx cap sync ios
           
-          # 1. Force Podfile to 15.0
+          # Force the Podfile to the correct 2026 version
           cat <<EOF > ios/App/Podfile
           platform :ios, '15.0'
           use_frameworks!
@@ -35,8 +36,7 @@ jobs:
           end
           EOF
 
-          # 2. FORCE Xcode Project settings to 15.0
-          # This fixes Error 65 by aligning the project with the Podfile
+          # Ensure the Xcode project deployment target is synced
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' ios/App/App.xcodeproj/project.pbxproj
 
       - name: Install Pods
