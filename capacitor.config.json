@@ -3,6 +3,7 @@
   "appId": "com.AyushEHR.app",
   "appName": "AyushEHR",
   "webDir": "www",
+  "ios": { "minVersion": "15.0" },
   "server": {
     "url": "https://appdev.ayushehr.com",
     "allowNavigation": [

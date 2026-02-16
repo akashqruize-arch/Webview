@@ -21,14 +21,17 @@ jobs:
 
       - name: Clean & Fresh iOS Platform
         run: |
+          # 1. Clear the old folder
           rm -rf ios
+          
+          # 2. Add the platform fresh
           npx cap add ios
           npx cap sync ios
           
-          # Force the Podfile to use iOS 14.0 (Minimum for Capacitor 7/8)
-          echo "Bumping iOS deployment target in Podfile..."
+          # 3. FORCE the Podfile to use iOS 15.0 (The 2026 Standard)
+          echo "Bumping iOS deployment target to 15.0 for Capacitor 8 compatibility..."
           cat <<EOF > ios/App/Podfile
-          platform :ios, '14.0'
+          platform :ios, '15.0'
           use_frameworks!
           target 'App' do
             # Standard Capacitor Pods
