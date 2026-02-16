@@ -24,6 +24,15 @@ jobs:
         run: |
           rm -rf ios
           npx cap add ios
+      - name: Debug iOS folder
+        run: |
+          echo "===== ROOT ====="
+          ls
+          echo "===== IOS ====="
+          ls ios || echo "ios folder not created"
+          echo "===== IOS/APP ====="
+          ls ios/App || echo "ios/App not created"
+
           npx cap sync ios
 
       - name: Install CocoaPods
